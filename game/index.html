@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skylark Courier: Ember Canyon Run</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #171019; overflow: hidden; }
+  body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+  #stage { position: relative; width: 100vw; height: 100vh; }
+  #game { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .hud {
+    position: absolute; color: #fff3d6; font-weight: 600;
+    text-shadow: 0 1px 3px rgba(0,0,0,.7); pointer-events: none;
+    user-select: none;
+  }
+  .panel {
+    background: rgba(20,16,28,.55); border: 1px solid rgba(255,243,214,.25);
+    border-radius: 8px; padding: 8px 12px;
+  }
+  .hud .label { font-size: 11px; letter-spacing: .14em; opacity: .75; }
+  .hud .value { font-size: 24px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  #hud-left { top: 14px; left: 14px; display: flex; gap: 10px; }
+  #hud-right { top: 14px; right: 14px; text-align: right; display: flex; gap: 10px; }
+  #hud-mission { font-size: 15px; }
+  #hud-timer { font-size: 20px; color: #ffb347; }
+  #hud-bottom-left { left: 14px; bottom: 14px; width: 250px; }
+  .gauge { margin-top: 6px; }
+  .gauge .track { height: 10px; background: rgba(255,255,255,.18); border-radius: 5px; overflow: hidden; margin-top: 2px; }
+  .gauge .fill { height: 100%; background: #7de08a; border-radius: 5px; transition: width .15s linear; }
+  #hud-throttle-bar { background: #ffb347; }
+  #hud-fuel-bar.low { background: #ff5a4e; }
+  #hud-bottom-right { right: 14px; bottom: 150px; text-align: right; }
+  #hud-warnings { top: 96px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; }
+  .warn {
+    display: none; padding: 6px 14px; border-radius: 6px; font-size: 15px;
+    letter-spacing: .12em; background: rgba(120,10,5,.75); border: 1px solid #ff5a4e;
+  }
+  .warn.on { display: block; animation: blink .5s steps(2) infinite; }
+  @keyframes blink { 50% { opacity: .35; } }
+  .hidden { display: none !important; }
+  #overlay {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center;
+    background: linear-gradient(rgba(20,10,16,.25), rgba(20,10,16,.55));
+    color: #fff3d6; pointer-events: none; padding: 0 24px;
+  }
+  #overlay-title {
+    font-size: 52px; font-weight: 800; letter-spacing: .04em; line-height: 1.05;
+    text-shadow: 0 3px 18px rgba(0,0,0,.8); max-width: 900px;
+  }
+  #overlay-body { font-size: 18px; margin-top: 14px; max-width: 720px; line-height: 1.5; text-shadow: 0 1px 6px rgba(0,0,0,.8); }
+  #overlay-hint { font-size: 15px; margin-top: 22px; color: #ffd34d; text-shadow: 0 1px 6px rgba(0,0,0,.8); }
+  #help { position: absolute; left: 14px; bottom: 14px; transform: translateY(-118px); font-size: 12px; color: rgba(255,243,214,.8); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="game" width="1280" height="720"></canvas>
+
+  <div id="hud-left" class="hud">
+    <div class="panel"><div class="label">ALTITUDE</div><div class="value" id="hud-alt">420 ft</div></div>
+    <div class="panel"><div class="label">SPEED</div><div class="value" id="hud-speed">118 kt</div></div>
+    <div class="panel"><div class="label">HEADING</div><div class="value" id="hud-heading">000°</div></div>
+  </div>
+
+  <div id="hud-right" class="hud">
+    <div class="panel"><div class="label">SCORE</div><div class="value" id="hud-score">0</div></div>
+    <div class="panel"><div class="label">RINGS</div><div class="value" id="hud-rings">0/8</div></div>
+    <div class="panel"><div class="label">MISSION</div><div id="hud-mission">Mission 1 — Ring Run</div><div id="hud-timer"></div></div>
+  </div>
+
+  <div id="hud-warnings" class="hud hidden">
+    <span class="warn" id="warn-stall">⚠ STALL</span>
+    <span class="warn" id="warn-fuel">⚠ LOW FUEL</span>
+    <span class="warn" id="warn-terrain">⚠ TERRAIN</span>
+  </div>
+
+  <div id="hud-bottom-left" class="hud panel">
+    <div class="gauge"><div class="label">THROTTLE — <span id="hud-throttle">68%</span></div><div class="track"><div class="fill" id="hud-throttle-bar" style="width:68%"></div></div></div>
+    <div class="gauge"><div class="label">FUEL — <span id="hud-fuel">100%</span></div><div class="track"><div class="fill" id="hud-fuel-bar" style="width:100%"></div></div></div>
+  </div>
+
+  <div id="help" class="hud">W/S pitch · A/D bank · Shift/Ctrl throttle · Space boost · mouse steer · wheel throttle · P pause · R restart · M mute</div>
+
+  <div id="overlay" class="hidden">
+    <div id="overlay-title"></div>
+    <div id="overlay-body"></div>
+    <div id="overlay-hint"></div>
+  </div>
+</div>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
